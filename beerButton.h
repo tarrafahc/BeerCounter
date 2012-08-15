@@ -1,4 +1,9 @@
+#ifndef Morse_h
+#define Morse_h
 
+// the #include statment and code go here...
+
+#include "Arduino.h"
 #include <EEPROM.h>
 
 const int buttonPin = 2;     // the number of the pushbutton pin
@@ -59,7 +64,6 @@ void brejaButton() {
        }
     }
     buttonState = reading;
-
   }
   
   // set the LED using the state of the button:
@@ -71,3 +75,4 @@ void brejaButton() {
   lastButtonState = reading;
 }
 
+#endif
