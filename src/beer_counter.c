@@ -17,14 +17,17 @@
 } while (0)
 #define ler_bit(pin, bit) (pin & (1<<bit))
 
-/* Número de cervejas para mostrar no contador */
-static volatile uint16_t cervejas = 0;
+/* Número de cervejas tomadas. */
+static volatile uint16_t cervejas16;
+/* Número de cervejas tomadas dividido em 4 dígitos. */
+static volatile uint8_t cervejas[4] = { 0 };
 
 /* O LED do botão está na porta C neste pino. */
 const int pino_LED = 5;
 
 void main(void)
 {
+    uint16_t cervejas_temp;
     uint16_t botao_apertado;
 
     /* Descomente a próxima linha para reiniciar a contagem do zero cada
@@ -36,7 +39,16 @@ void main(void)
      * na memória RAM. A cada cerveja tomada, a variável é incrementada e
      * seu valor é atualizado na EEPROM.
      */
-    cervejas = eeprom_read_word(0);
+    cervejas16 = eeprom_read_word(0);
+
+    cervejas_temp = cervejas16;
+    cervejas[0] = cervejas_temp % 10;
+    cervejas_temp /= 10;
+    cervejas[1] = cervejas_temp % 10;
+    cervejas_temp /= 10;
+    cervejas[2] = cervejas_temp % 10;
+    cervejas_temp /= 10;
+    cervejas[3] = cervejas_temp;
 
     /* Os displays estão interligados assim:
      *     (a)     (b)
@@ -107,22 +119,27 @@ void main(void)
 
         /* aproximadamente 50 ms */
         if (botao_apertado == 3277) {
-            uint8_t n = 3;
+            uint8_t carry = 1;
+            uint8_t i;
 
             /* O botão foi apertado! */
 
-            /* Incrementar contador de cervejas. */
-            cervejas++;
-
-            /* Seus bebados, tomaram 10000 cervejas! */
-            if (cervejas == 10000)
-                cervejas = 0;
+            /* Incrementar contador de cervejas */
+            cervejas16++;
+            /* Agora, um dígito por vez. */
+            for (i = 0; (i < 4) && carry; i++) {
+                cervejas[i] += carry;
+                if (cervejas[i] == 10) {
+                    cervejas[i] = 0;
+                    carry = 1;
+                }
+            }
 
             /* Gravar valor na EEPROM. */
-            eeprom_write_word(0, cervejas);
+            eeprom_write_word(0, cervejas16);
 
             /* Piscar LED do botão 3 vezes. */
-            while (n--) {
+            for (i = 0; i < 3; i++) {
                 desligar_bit(PORTC, pino_LED);
                 _delay_ms(200);
                 ligar_bit(PORTC, pino_LED);
@@ -139,20 +156,10 @@ void main(void)
  * é chamada, os displays ligados são alternados. */
 ISR(TIMER1_COMPA_vect)
 {
-    uint16_t cervejas_temp = cervejas;
     static int idx = 0;
     uint8_t valor_saida;
-    uint8_t numeros[4];
 
-    numeros[0] = cervejas_temp % 10;
-    cervejas_temp /= 10;
-    numeros[1] = cervejas_temp % 10;
-    cervejas_temp /= 10;
-    numeros[2] = cervejas_temp % 10;
-    cervejas_temp /= 10;
-    numeros[3] = cervejas_temp;
-
-    valor_saida = numeros[!idx] | (numeros[!idx+2] << 4);
+    valor_saida = cervejas[!idx] | (cervejas[!idx+2] << 4);
 
     desligar_bit(PORTD, (6 + idx));
     PORTB = valor_saida;
