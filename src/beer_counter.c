@@ -33,6 +33,7 @@ static volatile uint8_t cervejas[4] = { 0 };
 /* O LED do botão está na porta C neste pino. */
 const int pino_LED = 5;
 
+void main(void) __attribute__((noreturn));
 void main(void)
 {
     uint16_t cervejas_temp;
