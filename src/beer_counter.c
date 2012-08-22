@@ -22,7 +22,7 @@ extern div_t udiv(int __num, int __denom) __asm__("__udivmodhi4") __ATTR_CONST__
 #define ler_bit(pin, bit) (pin & (1<<bit))
 
 /* Número de cervejas tomadas dividido em 4 dígitos. */
-static volatile uint8_t cervejas[4] = { 0 };
+static uint8_t cervejas[4] = { 0 };
 
 /* O LED do botão está na porta C neste pino. */
 static const int pino_LED = 5;
