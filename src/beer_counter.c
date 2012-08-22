@@ -25,7 +25,7 @@ extern div_t udiv(int __num, int __denom) __asm__("__udivmodhi4") __ATTR_CONST__
 static uint8_t cervejas[4] = { 0 };
 
 /* O LED do botão está na porta C neste pino. */
-static const int pino_LED = 5;
+static const uint8_t pino_LED = 5;
 
 void main(void) __attribute__((noreturn));
 void main(void)
