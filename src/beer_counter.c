@@ -150,7 +150,7 @@ void main(void)
             eeprom_write_word(&cervejas_eeprom, cervejas_ram);
 
             /* Piscar LED do botão 3 vezes. */
-            for (i = 0; i < 3; i++) {
+            for (i = 3; i; i--) {
                 desligar_bit(PORTC, pino_LED);
                 _delay_ms(167);
                 ligar_bit(PORTC, pino_LED);
