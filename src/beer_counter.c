@@ -141,9 +141,9 @@ void main(void)
             /* Piscar LED do botão 3 vezes. */
             for (i = 0; i < 3; i++) {
                 desligar_bit(PORTC, pino_LED);
-                _delay_ms(200);
+                _delay_ms(167);
                 ligar_bit(PORTC, pino_LED);
-                _delay_ms(200);
+                _delay_ms(166);
             }
 
             /* Reiniciar contador do botão. */
