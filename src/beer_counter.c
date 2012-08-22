@@ -128,7 +128,6 @@ void main(void)
 
         /* aproximadamente 50 ms */
         if (botao_apertado == 3277) {
-            uint8_t carry = 1;
             uint8_t i;
 
             /* O botão foi apertado! */
@@ -137,10 +136,9 @@ void main(void)
             cervejas_ram++;
             /* Agora, um dígito por vez. */
             for (i = 0; i < 4; i++) {
-                cervejas[i] += carry;
+                cervejas[i]++;
                 if (cervejas[i] == 10) {
                     cervejas[i] = 0;
-                    carry = 1;
                 } else {
                     break;
                 }
