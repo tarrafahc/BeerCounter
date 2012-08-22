@@ -17,7 +17,11 @@
 } while (0)
 #define ler_bit(pin, bit) (pin & (1<<bit))
 
-/* Número de cervejas tomadas. */
+/* Número de cervejas tomadas - EEPROM
+ * Valor inicial (quando EEPROM é gravada) */
+static uint16_t cervejas_eeprom EEMEM = 42;
+
+/* Número de cervejas tomadas - RAM */
 static volatile uint16_t cervejas16;
 /* Número de cervejas tomadas dividido em 4 dígitos. */
 static volatile uint8_t cervejas[4] = { 0 };
@@ -30,16 +34,12 @@ void main(void)
     uint16_t cervejas_temp;
     uint16_t botao_apertado;
 
-    /* Descomente a próxima linha para reiniciar a contagem do zero cada
-     * vez que o contador é ligado. */
-//    eeprom_write_word(0, 0);
-
     /* O número de cervejas tomadas fica gravado na EEPROM no endereço 0.
      * No começo do programa, esse valor é lido e guardado em uma variável
      * na memória RAM. A cada cerveja tomada, a variável é incrementada e
      * seu valor é atualizado na EEPROM.
      */
-    cervejas16 = eeprom_read_word(0);
+    cervejas16 = eeprom_read_word(&cervejas_eeprom);
 
     cervejas_temp = cervejas16;
     cervejas[0] = cervejas_temp % 10;
@@ -136,7 +136,7 @@ void main(void)
             }
 
             /* Gravar valor na EEPROM. */
-            eeprom_write_word(0, cervejas16);
+            eeprom_write_word(&cervejas_eeprom, cervejas16);
 
             /* Piscar LED do botão 3 vezes. */
             for (i = 0; i < 3; i++) {
