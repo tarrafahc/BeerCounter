@@ -21,12 +21,6 @@ extern div_t udiv(int __num, int __denom) __asm__("__udivmodhi4") __ATTR_CONST__
 } while (0)
 #define ler_bit(pin, bit) (pin & (1<<bit))
 
-/* Número de cervejas tomadas - EEPROM
- * Valor inicial (quando EEPROM é gravada) */
-static uint16_t cervejas_eeprom EEMEM = 42;
-
-/* Número de cervejas tomadas - RAM */
-static volatile uint16_t cervejas16;
 /* Número de cervejas tomadas dividido em 4 dígitos. */
 static volatile uint8_t cervejas[4] = { 0 };
 
@@ -36,6 +30,12 @@ const int pino_LED = 5;
 void main(void) __attribute__((noreturn));
 void main(void)
 {
+    /* Número de cervejas tomadas - EEPROM
+     * Valor inicial (quando EEPROM é gravada) */
+    static uint16_t cervejas_eeprom EEMEM = 42;
+    /* Número de cervejas tomadas - RAM */
+    uint16_t cervejas_ram;
+
     uint16_t cervejas_temp;
     uint16_t botao_apertado;
     div_t div_ret;
@@ -45,9 +45,9 @@ void main(void)
      * na memória RAM. A cada cerveja tomada, a variável é incrementada e
      * seu valor é atualizado na EEPROM.
      */
-    cervejas16 = eeprom_read_word(&cervejas_eeprom);
+    cervejas_ram = eeprom_read_word(&cervejas_eeprom);
 
-    cervejas_temp = cervejas16;
+    cervejas_temp = cervejas_ram;
 
     /* Dividir com udiv() para poder usar tanto o quociente quanto o resto
      * com uma só execução da função de divisão. */
@@ -134,7 +134,7 @@ void main(void)
             /* O botão foi apertado! */
 
             /* Incrementar contador de cervejas */
-            cervejas16++;
+            cervejas_ram++;
             /* Agora, um dígito por vez. */
             for (i = 0; i < 4; i++) {
                 cervejas[i] += carry;
@@ -147,7 +147,7 @@ void main(void)
             }
 
             /* Gravar valor na EEPROM. */
-            eeprom_write_word(&cervejas_eeprom, cervejas16);
+            eeprom_write_word(&cervejas_eeprom, cervejas_ram);
 
             /* Piscar LED do botão 3 vezes. */
             for (i = 0; i < 3; i++) {
