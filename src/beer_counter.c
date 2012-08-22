@@ -125,11 +125,13 @@ void main(void)
             /* Incrementar contador de cervejas */
             cervejas16++;
             /* Agora, um dígito por vez. */
-            for (i = 0; (i < 4) && carry; i++) {
+            for (i = 0; i < 4; i++) {
                 cervejas[i] += carry;
                 if (cervejas[i] == 10) {
                     cervejas[i] = 0;
                     carry = 1;
+                } else {
+                    break;
                 }
             }
 
