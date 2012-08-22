@@ -1,12 +1,16 @@
 /* Estamos usando o oscilador interno a 1Mhz */
 #define F_CPU 1000000
 
+#include <stdlib.h>
 #include <inttypes.h>
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <avr/sleep.h>
 #include <avr/eeprom.h> 
 #include <util/delay.h>
+
+/* Função de divisão unsigned da libgcc. */
+extern div_t udiv(int __num, int __denom) __asm__("__udivmodhi4") __ATTR_CONST__;
 
 /* Macros para ligar, desligar e ler bits */
 #define ligar_bit(porta, bit) do {      \
@@ -33,6 +37,7 @@ void main(void)
 {
     uint16_t cervejas_temp;
     uint16_t botao_apertado;
+    div_t div_ret;
 
     /* O número de cervejas tomadas fica gravado na EEPROM no endereço 0.
      * No começo do programa, esse valor é lido e guardado em uma variável
@@ -42,13 +47,18 @@ void main(void)
     cervejas16 = eeprom_read_word(&cervejas_eeprom);
 
     cervejas_temp = cervejas16;
-    cervejas[0] = cervejas_temp % 10;
-    cervejas_temp /= 10;
-    cervejas[1] = cervejas_temp % 10;
-    cervejas_temp /= 10;
-    cervejas[2] = cervejas_temp % 10;
-    cervejas_temp /= 10;
-    cervejas[3] = cervejas_temp;
+
+    /* Dividir com udiv() para poder usar tanto o quociente quanto o resto
+     * com uma só execução da função de divisão. */
+    div_ret       = udiv(cervejas_temp, 10);
+    cervejas[0]   = div_ret.rem;
+    cervejas_temp = div_ret.quot;
+    div_ret       = udiv(cervejas_temp, 10);
+    cervejas[1]   = div_ret.rem;
+    cervejas_temp = div_ret.quot;
+    div_ret       = udiv(cervejas_temp, 10);
+    cervejas[2]   = div_ret.rem;
+    cervejas[3]   = div_ret.quot;
 
     /* Os displays estão interligados assim:
      *     (a)     (b)
