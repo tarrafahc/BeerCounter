@@ -156,8 +156,8 @@ void main(void)
  * é chamada, os displays ligados são alternados. */
 ISR(TIMER1_COMPA_vect)
 {
-    uint8_t valor_saida = cervejas[!idx] | (cervejas[!idx+2] << 4);
     static int idx = 0;
+    uint8_t valor_saida = cervejas[!idx] | (cervejas[!idx+2] << 4);
 
     desligar_bit(PORTD, (6 + idx));
     PORTB = valor_saida;
