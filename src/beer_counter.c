@@ -78,11 +78,9 @@ void main(void)
      * código) que fica alternando o ligamento dos displays. */
     cli();
     TCCR1A = 0;
-    TCCR1B = 0;
-    OCR1A = 625;
-    TCCR1B |= (1 << WGM12);
-    TCCR1B |= (1 << CS11); // prescaler 8
-    TIMSK  |= (1 << OCIE1A);
+    TCCR1B = (1 << WGM12) | (1 << CS11);
+    OCR1A  = 625;
+    TIMSK |= (1 << OCIE1A);
     sei();
 
     /* Pinos de saída e entrada de cada porta:
@@ -103,7 +101,7 @@ void main(void)
     /* Ligamos o LED do botão. */
     ligar_bit(PORTC, pino_LED);
 
-    /* Loop infinito que verifica se o botão foi apertado */
+    /* Loop infinito que verifica se o botão foi apertado. */
     while (1) {
         /* Para evitar que o "bouncing" do botão seja considerado como várias
          * apertadas, considera-se que o botão só é efetivamente apertado se
@@ -156,10 +154,8 @@ void main(void)
  * é chamada, os displays ligados são alternados. */
 ISR(TIMER1_COMPA_vect)
 {
+    uint8_t valor_saida = cervejas[!idx] | (cervejas[!idx+2] << 4);
     static int idx = 0;
-    uint8_t valor_saida;
-
-    valor_saida = cervejas[!idx] | (cervejas[!idx+2] << 4);
 
     desligar_bit(PORTD, (6 + idx));
     PORTB = valor_saida;
